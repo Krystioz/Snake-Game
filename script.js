@@ -1,12 +1,23 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
+class SnakePart {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
 let speed = 7;
 
 let tileCount = 20;
 let tileSize = canvas.width / tileCount - 2;
+
 let headX = 10;
 let headY = 10;
+
+const snakeParts = [];
+let tailLength = 2;
 
 let appleX = 5;
 let appleY = 5;
@@ -14,15 +25,28 @@ let appleY = 5;
 let xVelocity = 0;
 let yVelocity = 0;
 
+let score = 0;
+
 //game loop
 function drawGame() {
-    clearScreen();
     chageSnakePosition();
+
+    
+    clearScreen();
 
     checkAppleCollistion();
     drawApple();
     drawSnake();
+
+    drawScore();
+
     setTimeout(drawGame, 1000 / speed);
+}
+
+function drawScore() {
+    ctx.fillStyle = "white";
+    ctx.font = "10px Verdana";
+    ctx.fillText("Score " + score, canvas.width - 50, 10);
 }
 
 function clearScreen() {
@@ -34,6 +58,27 @@ function clearScreen() {
 }
 
 function drawSnake() {
+    ctx.fillStyle = "green";
+
+    //draw snakeparts
+    for (let i = 0; i < snakeParts.length; i++) {
+        let part = snakeParts[i];
+        ctx.fillRect(
+            part.x * tileCount,
+            part.y * tileCount,
+            tileSize,
+            tileSize
+        );
+    }
+    //constantly create new snakeparts but dont increment tail length
+    //if drawn more snakeparts than the tail length, remove last last part constantly
+    snakeParts.push(new SnakePart(headX, headY));
+    //put the item at the end of the list next to the head
+    //behind the scenes it always removes the extra tail item if it exceeds tailLength
+    if (snakeParts.length > tailLength) {
+        snakeParts.shift(); // remove the furthest item from the snake parts
+    }
+
     ctx.fillStyle = "orange";
     ctx.fillRect(headX * tileCount, headY * tileCount, tileCount, tileCount);
 }
@@ -55,6 +100,8 @@ function checkAppleCollistion() {
         //random position within canvas tiles
         appleX = Math.floor(Math.random() * 20);
         appleY = Math.floor(Math.random() * 20);
+        tailLength++;
+        score++;
     }
 }
 
